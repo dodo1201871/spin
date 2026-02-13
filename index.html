@@ -1,148 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Spin & Win - South Africa</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f7f9;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    h1 {
-      color: #2c3e50;
-      margin-top: 30px;
-    }
-    #wheelContainer {
-      position: relative;
-      margin: 30px auto;
-      width: 360px;
-      height: 360px;
-    }
-    #wheel {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 10px solid #27ae60;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      transition: transform 5s ease-out;
-    }
-    #pointer {
-      width: 0;
-      height: 0;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-bottom: 30px solid #e74c3c;
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    #spinBtn {
-      padding: 15px 30px;
-      font-size: 18px;
-      background-color: #2980b9;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    #spinBtn:hover {
-      background-color: #1c669d;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #27ae60;
-      min-height: 30px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Spin Wheel</title>
+<style>
+body {
+  background:#1E1F29;
+  font-family: Arial, sans-serif;
+  text-align:center;
+  color:#fff;
+  margin:0;
+}
+h1 {color:#FFD700;margin-top:30px;}
+p {color:#ffffffb0;}
+#wheelContainer {
+  position:relative;
+  width:320px;
+  height:320px;
+  margin:40px auto;
+}
+canvas {
+  border-radius:50%;
+  border:10px solid #FFD700;
+}
+#pointer {
+  width:0;
+  height:0;
+  border-left:20px solid transparent;
+  border-right:20px solid transparent;
+  border-bottom:30px solid #FFD700;
+  position:absolute;
+  top:-30px;
+  left:50%;
+  transform:translateX(-50%);
+}
+#spinBtn {
+  background:#00FF9D;
+  border:none;
+  padding:15px 40px;
+  font-size:20px;
+  font-weight:bold;
+  border-radius:10px;
+  cursor:pointer;
+  margin-top:20px;
+}
+#spinBtn:hover {background:#00e286;}
+#result {
+  font-size:22px;
+  margin-top:20px;
+  color:#FFD700;
+  display:none;
+}
+</style>
 </head>
 <body>
 
-  <h1>🎉 Spin & Win in South Africa!</h1>
+<h1>🎉 Spin & Win</h1>
+<p>You have been selected to spin the Lucky Wheel!</p>
 
-  <div id="wheelContainer">
-    <div id="pointer"></div>
-    <canvas id="wheel" width="360" height="360"></canvas>
-  </div>
+<div id="wheelContainer">
+  <div id="pointer"></div>
+  <canvas id="wheel" width="320" height="320"></canvas>
+</div>
 
-  <button id="spinBtn">Spin Now 🔄</button>
-  <div id="result"></div>
+<button id="spinBtn">SPIN NOW</button>
+<div id="result"></div>
 
-  <audio id="spinSound">
-    <source src="https://cdn.pixabay.com/download/audio/2023/01/03/audio_8e604dcab5.mp3?filename=spin-wheel-113441.mp3" type="audio/mp3">
-  </audio>
+<script>
+const wheel = document.getElementById("wheel");
+const ctx = wheel.getContext("2d");
+const result = document.getElementById("result");
+const spinBtn = document.getElementById("spinBtn");
 
-  <script>
-    const canvas = document.getElementById("wheel");
-    const ctx = canvas.getContext("2d");
-    const spinBtn = document.getElementById("spinBtn");
-    const resultTxt = document.getElementById("result");
-    const spinSound = document.getElementById("spinSound");
+const prizes = ["R1000 Cash","iPhone","Takealot Voucher","Free Data","R500","Bonus"];
+const colors = ["#FF3D00","#00D1FF","#FFD700","#28a745","#9b59b6","#e67e22"];
+const arc = Math.PI * 2 / prizes.length;
+let isSpinning = false;
 
-    const prizes = [
-      "R1000 Cheque",
-      "iPhone 15",
-      "Takealot Voucher",
-      "Free Airtime"
-    ];
+function drawWheel(){
+  for(let i=0;i<prizes.length;i++){
+    ctx.beginPath();
+    ctx.fillStyle = colors[i];
+    ctx.moveTo(160,160);
+    ctx.arc(160,160,150,arc*i,arc*(i+1));
+    ctx.fill();
+    ctx.save();
+    ctx.translate(160,160);
+    ctx.rotate(arc*i + arc/2);
+    ctx.fillStyle="#fff";
+    ctx.font="bold 14px Arial";
+    ctx.fillText(prizes[i],60,5);
+    ctx.restore();
+  }
+}
+drawWheel();
 
-    const redirectURL = "https://max1.mediabounty.store/?utm_medium=444c5ddbec55de11d9cfa98cd7aeb367aa0ca193&utm_campaign=sa";
+spinBtn.onclick = ()=>{
+  if(isSpinning) return;
+  isSpinning=true;
 
-    const colors = ["#f1c40f", "#2ecc71", "#3498db", "#9b59b6"];
-    const arc = 2 * Math.PI / prizes.length;
+  let deg = Math.floor(Math.random()*3000)+3000;
+  wheel.style.transition="transform 5s ease-out";
+  wheel.style.transform="rotate("+deg+"deg)";
 
-    function drawWheel() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < prizes.length; i++) {
-        const start = i * arc;
-        const end = start + arc;
-
-        ctx.beginPath();
-        ctx.fillStyle = colors[i];
-        ctx.moveTo(180, 180);
-        ctx.arc(180, 180, 180, start, end);
-        ctx.fill();
-
-        ctx.save();
-        ctx.translate(180, 180);
-        ctx.rotate(start + arc / 2);
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 16px Arial";
-        ctx.fillText(prizes[i], 100, 10);
-        ctx.restore();
-      }
-    }
-
-    drawWheel();
-
-    spinBtn.addEventListener("click", () => {
-      spinBtn.disabled = true;
-      resultTxt.textContent = "⏳ Spinning...";
-      spinSound.currentTime = 0;
-      spinSound.play();
-
-      const randomSpin = Math.floor(Math.random() * prizes.length);
-      const spins = 6;
-      const degreesPerSegment = 360 / prizes.length;
-      const finalAngle = (spins * 360) + (randomSpin * degreesPerSegment) + (degreesPerSegment / 2);
-
-      canvas.style.transition = "transform 5s ease-out";
-      canvas.style.transform = `rotate(${finalAngle}deg)`;
-
-      setTimeout(() => {
-        resultTxt.textContent = `🎁 You won: ${prizes[randomSpin]}!`;
-        setTimeout(() => window.location.href = redirectURL, 2500);
-      }, 5200);
-    });
-  </script>
+  setTimeout(()=>{
+    const win = prizes[Math.floor(Math.random()*prizes.length)];
+    result.style.display="block";
+    result.innerHTML="🎁 You won "+win+"!";
+    setTimeout(()=>{
+      window.location.href="https://max.bountyads.store/?utm_medium=f00e2c6f9f959bfb01f628e64f8c13122d7ceb87&utm_campaign=target_ZA_9ac614";
+    },2000);
+  },5000);
+};
+</script>
 
 </body>
 </html>
-
